@@ -127,66 +127,7 @@
 
 ---
 
-## 📝 Recording Tips:
 
-### Before Recording:
-1. ✅ Close unnecessary browser tabs
-2. ✅ Clear desktop clutter
-3. ✅ Test audio quality
-4. ✅ Have videos ready to play
-5. ✅ Practice the script 2-3 times
-6. ✅ Set up anomaly scenario (video with 2+ people)
-
-### During Recording:
-1. 🎙️ Speak clearly and at moderate pace
-2. 🖱️ Move mouse slowly and deliberately
-3. ⏸️ Pause briefly between sections
-4. 😊 Sound enthusiastic and confident
-5. 🎯 Stay within 3-minute limit
-
-### Recording Tools:
-- **Windows**: Xbox Game Bar (Win + G)
-- **OBS Studio**: Free, professional quality
-- **Loom**: Easy browser-based recording
-- **Camtasia**: If you have it (paid)
-
-### Video Settings:
-- **Resolution**: 1920x1080 (1080p)
-- **Frame Rate**: 30 fps minimum
-- **Format**: MP4
-- **Audio**: Clear voice, no background noise
-
-### After Recording:
-1. ✅ Watch the full video
-2. ✅ Check audio sync
-3. ✅ Verify all features shown
-4. ✅ Add title slide (optional)
-5. ✅ Export in MP4 format
-6. ✅ Upload to YouTube (unlisted) or Google Drive
-
----
-
-## 🎬 Alternative: Shorter Version (If needed)
-
-If you need to cut it to 2 minutes:
-
-**Keep:**
-- Intro (15s)
-- Person detection demo (30s)
-- AI analysis (40s)
-- Closing (15s)
-
-**Reduce:**
-- Skip multi-video switching
-- Shorten UI walkthrough
-
----
-
-## 📤 Where to Upload:
-
-1. **YouTube** (Unlisted) - Easy to share link
-2. **Google Drive** - Direct file sharing
-3. **Vimeo** - Professional platform
 
 **Remember to include the link in your hackathon submission!**
 
