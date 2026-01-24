@@ -22,7 +22,4 @@ ENV/
 Thumbs.db
 
 # Project specific
-*.mp4
-*.avi
-static/videos/*.mp4
-static/videos/*.avi
+test_gemini.py
