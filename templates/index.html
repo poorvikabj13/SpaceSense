@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SpaceSense</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #020b1c 0%, #0a1929 100%);
+            color: white;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 24px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            gap: 30px;
+        }
+
+        .video-box {
+            border: 3px solid #ff6b6b;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+        }
+
+        .panel {
+            background: rgba(11, 23, 54, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            width: 320px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #4ecdc4;
+            background: #0a1929;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        select:hover {
+            border-color: #ff6b6b;
+        }
+
+        .status {
+            margin-top: 20px;
+        }
+
+        .status p {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .badge {
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .normal {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+        }
+
+        .high {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+        }
+
+        .ai-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .ai-section h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #4ecdc4;
+        }
+
+        .ai-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .ai-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .ai-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .ai-result {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            min-height: 80px;
+            color: #e0e0e0;
+        }
+
+        .loading {
+            text-align: center;
+            color: #4ecdc4;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div>
+            <img id="video" class="video-box" src="/video_feed?video=video1" width="640">
+        </div>
+
+        <div class="panel">
+            <h2>🚨 SpaceSense</h2>
+
+            <select onchange="changeVideo(this.value)">
+                <option value="video1">Pedestrian Video 1</option>
+                <option value="video2">Pedestrian Video 2</option>
+                <option value="video3">Pedestrian Video 3</option>
+            </select>
+
+            <div class="status">
+                <p>Status: <span id="status">NORMAL</span></p>
+                <p>Anomalies: <span id="anomalies">0</span></p>
+                <p>Confidence: <span id="confidence">0</span></p>
+
+                <div id="badge" class="badge normal">NORMAL</div>
+            </div>
+
+            <div class="ai-section">
+                <h3>🤖 AI Analysis (Gemini)</h3>
+                <button class="ai-button" onclick="analyzeWithAI()" id="aiBtn">
+                    Analyze Scene with AI
+                </button>
+                <div class="ai-result" id="aiResult">
+                    Click the button to get AI-powered scene analysis...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function changeVideo(val) {
+            document.getElementById("video").src =
+                "/video_feed?video=" + val + "&t=" + new Date().getTime();
+        }
+
+        setInterval(() => {
+            fetch("/detect")
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("status").innerText = data.status;
+                    document.getElementById("anomalies").innerText = data.anomalies;
+                    document.getElementById("confidence").innerText = data.confidence;
+
+                    let badge = document.getElementById("badge");
+                    if (data.status === "ANOMALY DETECTED") {
+                        badge.className = "badge high";
+                        badge.innerText = "HIGH";
+                    } else {
+                        badge.className = "badge normal";
+                        badge.innerText = "NORMAL";
+                    }
+
+                    // Update AI analysis if available
+                    if (data.ai_analysis && data.ai_analysis !== "") {
+                        document.getElementById("aiResult").innerText = data.ai_analysis;
+                    }
+                });
+        }, 1000);
+
+        function analyzeWithAI() {
+            const btn = document.getElementById("aiBtn");
+            const result = document.getElementById("aiResult");
+
+            btn.disabled = true;
+            result.innerHTML = '<div class="loading">🔄 Analyzing with Google Gemini AI...</div>';
+
+            fetch("/analyze_ai")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        result.innerText = data.analysis;
+                    } else {
+                        result.innerText = "⚠️ " + data.message;
+                    }
+                    btn.disabled = false;
+                })
+                .catch(err => {
+                    result.innerText = "❌ Error: " + err.message;
+                    btn.disabled = false;
+                });
+        }
+    </script>
+
+</body>
+
+</html>
