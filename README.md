@@ -109,7 +109,7 @@ SpaceSense/
 MIT License
 
 ## 👥 Team
-[Your Team Name]
+**Team Posh**
 
 ## 🙏 Acknowledgments
 - Google Developer Groups

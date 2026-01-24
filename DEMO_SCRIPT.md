@@ -1,0 +1,195 @@
+# SpaceSense - 3-Minute Demo Video Script
+## Team Posh | TechSprint 2026
+
+**Total Duration: 3 minutes**
+
+---
+
+## 🎬 INTRO (0:00 - 0:20) - 20 seconds
+
+**[Screen: Title slide or desktop]**
+
+**Narration:**
+> "Hi! I'm [Your Name] from Team Posh, and this is SpaceSense - an AI-powered pedestrian anomaly detection system built for TechSprint 2026."
+
+**[Screen: Show problem - crowded public space image]**
+
+> "Public spaces face challenges with overcrowding and security monitoring. SpaceSense solves this using computer vision and Google Gemini AI."
+
+---
+
+## 🖥️ DEMO PART 1: Application Overview (0:20 - 0:50) - 30 seconds
+
+**[Screen: Open browser to localhost:8080]**
+
+**Narration:**
+> "Let me show you how it works. Here's our web dashboard."
+
+**[Screen: Point to different UI elements]**
+
+> "On the left, we have our live video feed with real-time person detection. On the right, our control panel shows the current status, anomaly count, and confidence level."
+
+**[Action: Hover over dropdown]**
+
+> "We can monitor multiple video feeds - let's start with Pedestrian Video 1."
+
+---
+
+## 🔍 DEMO PART 2: Person Detection (0:50 - 1:20) - 30 seconds
+
+**[Screen: Video playing with person detection]**
+
+**Narration:**
+> "Notice the green bounding boxes? That's our HOG-based person detector identifying pedestrians in real-time."
+
+**[Screen: Point to person count at bottom]**
+
+> "At the bottom, you can see the live person count. Currently showing [X] people."
+
+**[Screen: Wait for or show anomaly detection]**
+
+> "When the system detects 2 or more people - indicating a crowd - it automatically triggers an anomaly alert."
+
+**[Screen: Show "ANOMALY DETECTED" text and status change]**
+
+> "See? The status changed to 'ANOMALY DETECTED', the badge turned red, and our confidence score is increasing."
+
+---
+
+## 🤖 DEMO PART 3: Google Gemini AI Analysis (1:20 - 2:00) - 40 seconds
+
+**[Screen: Focus on AI Analysis section]**
+
+**Narration:**
+> "Now here's where it gets really smart. This is our Google Gemini AI integration."
+
+**[Action: Click "Analyze Scene with AI" button]**
+
+> "When I click 'Analyze Scene with AI', it sends the current frame to Google's Gemini 2.0 Flash model."
+
+**[Screen: Show loading animation]**
+
+> "The AI is now analyzing the scene..."
+
+**[Screen: Show AI analysis result]**
+
+> "And there we go! Gemini provides an intelligent analysis describing the number of people, crowd density, and any potential security concerns - all in natural language."
+
+**[Action: Read part of the analysis]**
+
+> "It says: [Read first sentence of AI analysis]"
+
+> "This goes beyond simple detection - it's intelligent scene understanding powered by Google's latest AI technology."
+
+---
+
+## 🎯 DEMO PART 4: Features Showcase (2:00 - 2:30) - 30 seconds
+
+**[Screen: Switch between videos]**
+
+**Narration:**
+> "Let me show you the multi-video support. I can easily switch between different camera feeds."
+
+**[Action: Select Video 2 from dropdown]**
+
+> "Each video stream maintains its own state - notice how the anomaly count reset."
+
+**[Screen: Show the modern UI]**
+
+> "The interface features a modern design with gradient colors, smooth animations, and real-time updates every second."
+
+**[Action: Point to different metrics]**
+
+> "Everything updates live - status, anomalies, confidence levels - giving security personnel instant insights."
+
+---
+
+## 🌟 CLOSING: Impact & Tech Stack (2:30 - 3:00) - 30 seconds
+
+**[Screen: Show GitHub repo or architecture diagram]**
+
+**Narration:**
+> "SpaceSense is built with Python, Flask, OpenCV for computer vision, and most importantly - Google Gemini AI for intelligent analysis."
+
+**[Screen: Show use cases or impact slide]**
+
+> "This system can be deployed in offices, schools, retail stores, events, and public transport - anywhere crowd monitoring matters."
+
+> "It's scalable, real-time, and provides actionable AI-powered insights."
+
+**[Screen: Back to dashboard or final slide]**
+
+> "Thank you for watching! SpaceSense - making public spaces safer with AI. The complete code is available on GitHub, and we're excited to continue developing this for real-world deployment."
+
+**[Screen: Show contact info or GitHub link]**
+
+> "Team Posh, TechSprint 2026."
+
+---
+
+## 📝 Recording Tips:
+
+### Before Recording:
+1. ✅ Close unnecessary browser tabs
+2. ✅ Clear desktop clutter
+3. ✅ Test audio quality
+4. ✅ Have videos ready to play
+5. ✅ Practice the script 2-3 times
+6. ✅ Set up anomaly scenario (video with 2+ people)
+
+### During Recording:
+1. 🎙️ Speak clearly and at moderate pace
+2. 🖱️ Move mouse slowly and deliberately
+3. ⏸️ Pause briefly between sections
+4. 😊 Sound enthusiastic and confident
+5. 🎯 Stay within 3-minute limit
+
+### Recording Tools:
+- **Windows**: Xbox Game Bar (Win + G)
+- **OBS Studio**: Free, professional quality
+- **Loom**: Easy browser-based recording
+- **Camtasia**: If you have it (paid)
+
+### Video Settings:
+- **Resolution**: 1920x1080 (1080p)
+- **Frame Rate**: 30 fps minimum
+- **Format**: MP4
+- **Audio**: Clear voice, no background noise
+
+### After Recording:
+1. ✅ Watch the full video
+2. ✅ Check audio sync
+3. ✅ Verify all features shown
+4. ✅ Add title slide (optional)
+5. ✅ Export in MP4 format
+6. ✅ Upload to YouTube (unlisted) or Google Drive
+
+---
+
+## 🎬 Alternative: Shorter Version (If needed)
+
+If you need to cut it to 2 minutes:
+
+**Keep:**
+- Intro (15s)
+- Person detection demo (30s)
+- AI analysis (40s)
+- Closing (15s)
+
+**Reduce:**
+- Skip multi-video switching
+- Shorten UI walkthrough
+
+---
+
+## 📤 Where to Upload:
+
+1. **YouTube** (Unlisted) - Easy to share link
+2. **Google Drive** - Direct file sharing
+3. **Vimeo** - Professional platform
+
+**Remember to include the link in your hackathon submission!**
+
+---
+
+Good luck with your demo! 🚀
