@@ -1,32 +1,58 @@
 from flask import Flask, Response, render_template, jsonify, request
 import cv2
 from google import genai
+from google.genai import types
 import os
 from PIL import Image
-import io
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 
-VIDEO_MAP = {
-    "video1": "static/videos/demo.mp4",
-    "video2": "static/videos/demo2.mp4",
-    "video3": "static/videos/demo3.mp4",
+# Base directory for absolute paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+VIDEO_FEEDS = {
+    "video1": {
+        "id": "CAM-01",
+        "name": "Pedestrian Crossroad",
+        "path": os.path.join(BASE_DIR, "static", "videos", "demo.mp4"),
+        "type": "default"
+    },
+    "video2": {
+        "id": "CAM-02",
+        "name": "Lobby Entrance",
+        "path": os.path.join(BASE_DIR, "static", "videos", "demo2.mp4"),
+        "type": "default"
+    },
+    "video3": {
+        "id": "CAM-03",
+        "name": "Perimeter Lane",
+        "path": os.path.join(BASE_DIR, "static", "videos", "demo3.mp4"),
+        "type": "default"
+    }
 }
 
 # Configure Gemini API
-GEMINI_API_KEY = "AIzaSyDa4WbSnt3Ji5L_Zznp-gLjqWa5DLGPEhM"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyDa4WbSnt3Ji5L_Zznp-gLjqWa5DLGPEhM")
 
 # Validate API key
 if GEMINI_API_KEY == "YOUR_API_KEY_HERE" or not GEMINI_API_KEY:
-    print("⚠️  WARNING: GEMINI_API_KEY not set!")
+    print("[WARNING] GEMINI_API_KEY not set!")
     print("Get your key from: https://aistudio.google.com/app/apikey")
     
 try:
-    client = genai.Client(api_key=GEMINI_API_KEY)
-    print("✅ Gemini API initialized successfully!")
+    if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_API_KEY_HERE":
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        print("[SUCCESS] Gemini API initialized successfully!")
+    else:
+        client = None
+        print("[WARNING] Gemini API Client not initialized: key is missing or placeholder.")
 except Exception as e:
-    print(f"⚠️  Gemini API initialization failed: {e}")
+    print(f"[WARNING] Gemini API initialization failed: {e}")
     client = None
 
 # GLOBAL STATE - per video tracking
@@ -44,34 +70,42 @@ def get_or_create_state(video_key):
             'status': "NORMAL FLOW",
             'normal_frame_count': 0,
             'ai_analysis': "",
-            'last_frame': None
+            'last_frame': None,
+            'person_count': 0
         }
     return video_states[video_key]
 
 def analyze_with_gemini(frame):
     """Use Gemini AI to analyze the scene for anomalies"""
-    # Note: Google Gemini AI integration is included in the code
-    # The API may have compatibility issues with current SDK version
-    return """✅ Google Gemini AI Integration Included!
-
-This project demonstrates integration with Google Gemini API for AI-powered scene analysis.
-
-**Features implemented:**
-- Google Gemini SDK integrated (google-genai package)
-- Image processing and encoding for AI analysis
-- Prompt engineering for security assessment
-- Error handling and validation
-
-**Note:** Due to API version compatibility, live AI analysis may require SDK updates. The integration code is complete and ready for deployment with compatible API versions.
-
-**For hackathon judges:** The Google technology integration is demonstrated through the codebase implementation."""
+    if client is None:
+        return "⚠️ Gemini API Client is not initialized. Please configure a valid GEMINI_API_KEY in your environment or .env file."
+        
+    try:
+        # Convert OpenCV frame (BGR) to PIL Image (RGB)
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(rgb_frame)
+        
+        # Use modern google-genai Client syntax
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=[
+                "You are an expert AI security analyst monitoring live CCTV feeds. "
+                "Analyze this frame for anomalies, security concerns, crowd safety issues, or suspicious behaviors. "
+                "Provide a brief, high-impact assessment with bullet points summarizing key findings.",
+                pil_image
+            ]
+        )
+        return response.text
+    except Exception as e:
+        print(f"Gemini API analysis failed: {e}")
+        return f"❌ AI Analysis failed: {e}\n\nPlease check your API key and network connection."
 
 # Initialize HOG person detector
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
 # Anomaly threshold - trigger when this many or more people detected
-ANOMALY_THRESHOLD = 2
+ANOMALY_THRESHOLD = 5
 
 def generate(video_key):
     global current_video
@@ -79,7 +113,7 @@ def generate(video_key):
     
     state = get_or_create_state(video_key)
     
-    cap = cv2.VideoCapture(VIDEO_MAP[video_key])
+    cap = cv2.VideoCapture(VIDEO_FEEDS[video_key]["path"])
     
     # Reset state for fresh video stream
     state['anomaly_score'] = 0
@@ -90,7 +124,11 @@ def generate(video_key):
     while True:
         ret, frame = cap.read()
         if not ret:
-            break
+            # Loop the video by resetting frame position to 0
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            ret, frame = cap.read()
+            if not ret:
+                break
 
         # Resize frame for faster detection
         height, width = frame.shape[:2]
@@ -107,6 +145,7 @@ def generate(video_key):
         )
         
         person_count = len(boxes)
+        state['person_count'] = person_count
         
         # Draw bounding boxes on original frame
         for (x, y, w, h) in boxes:
@@ -169,12 +208,14 @@ def video_feed():
 
 @app.route("/detect")
 def detect():
-    state = get_or_create_state(current_video)
+    video_key = request.args.get("video", current_video)
+    state = get_or_create_state(video_key)
     return jsonify({
         "status": state['status'],
         "anomalies": state['anomaly_score'],
         "confidence": round(state['confidence'], 2),
-        "ai_analysis": state.get('ai_analysis', '')
+        "ai_analysis": state.get('ai_analysis', ''),
+        "person_count": state.get('person_count', 0)
     })
 
 @app.route("/analyze_ai")
@@ -182,10 +223,10 @@ def analyze_ai():
     """Trigger AI analysis on the current anomaly frame"""
     global last_ai_analysis, last_analysis_time
     
-    state = get_or_create_state(current_video)
+    video_key = request.args.get("video", current_video)
+    state = get_or_create_state(video_key)
     
     if state.get('last_frame') is not None:
-        # Perform AI analysis
         analysis = analyze_with_gemini(state['last_frame'])
         state['ai_analysis'] = analysis
         last_ai_analysis = analysis
@@ -199,8 +240,117 @@ def analyze_ai():
     else:
         return jsonify({
             "success": False,
-            "message": "No anomaly frame available for analysis"
+            "message": "No anomaly frame available for analysis. Adjust threshold or run a feed with people."
         })
+
+@app.route("/get_threshold")
+def get_threshold():
+    return jsonify({"threshold": ANOMALY_THRESHOLD})
+
+@app.route("/update_threshold", methods=["POST"])
+def update_threshold():
+    global ANOMALY_THRESHOLD
+    try:
+        data = request.get_json()
+        val = int(data.get("threshold", 2))
+        if 1 <= val <= 10:
+            ANOMALY_THRESHOLD = val
+            return jsonify({"success": True, "threshold": ANOMALY_THRESHOLD})
+        return jsonify({"success": False, "message": "Threshold must be between 1 and 10"}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 400
+
+@app.route("/get_api_key_status")
+def get_api_key_status():
+    is_set = client is not None and GEMINI_API_KEY != "YOUR_API_KEY_HERE"
+    masked_key = ""
+    if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_API_KEY_HERE":
+        masked_key = "..." + GEMINI_API_KEY[-4:]
+    return jsonify({"is_configured": is_set, "key_preview": masked_key})
+
+@app.route("/update_api_key", methods=["POST"])
+def update_api_key():
+    global GEMINI_API_KEY, client
+    try:
+        data = request.get_json()
+        key = data.get("api_key", "").strip().strip("'\"")
+        if not key:
+            return jsonify({"success": False, "message": "API key cannot be empty"}), 400
+            
+        GEMINI_API_KEY = key
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        
+        # Write to .env file for persistence
+        env_path = os.path.join(BASE_DIR, ".env")
+        with open(env_path, "w") as f:
+            f.write(f"GEMINI_API_KEY={GEMINI_API_KEY}\n")
+            
+        return jsonify({"success": True, "message": "API key updated and saved successfully!"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 400
+
+from werkzeug.utils import secure_filename
+import time
+
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "videos")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route("/get_feeds")
+def get_feeds():
+    feeds_list = []
+    for key, info in VIDEO_FEEDS.items():
+        feeds_list.append({
+            "key": key,
+            "id": info["id"],
+            "name": info["name"],
+            "type": info["type"]
+        })
+    return jsonify(feeds_list)
+
+@app.route("/upload_video", methods=["POST"])
+def upload_video():
+    if 'video' not in request.files:
+        return jsonify({"success": False, "message": "No video file provided"}), 400
+    
+    file = request.files['video']
+    if file.filename == '':
+        return jsonify({"success": False, "message": "No file selected"}), 400
+        
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        base, ext = os.path.splitext(filename)
+        unique_name = f"uploaded_{int(time.time())}{ext}"
+        filepath = os.path.join(UPLOAD_FOLDER, unique_name)
+        
+        file.save(filepath)
+        
+        new_key = f"uploaded_{len(VIDEO_FEEDS) + 1}"
+        new_id = f"CAM-0{len(VIDEO_FEEDS) + 1}"
+        display_name = request.form.get("name", "").strip() or base.replace("_", " ").title()
+        
+        VIDEO_FEEDS[new_key] = {
+            "id": new_id,
+            "name": display_name,
+            "path": filepath,
+            "type": "uploaded"
+        }
+        
+        return jsonify({
+            "success": True,
+            "message": "Video uploaded successfully!",
+            "feed": {
+                "key": new_key,
+                "id": new_id,
+                "name": display_name,
+                "type": "uploaded"
+            }
+        })
+        
+    return jsonify({"success": False, "message": "Invalid file format. Supported: mp4, avi, mov, mkv"}), 400
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
