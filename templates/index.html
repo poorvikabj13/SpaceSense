@@ -1,249 +1,1510 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>SpaceSense</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceSense AI - Intelligent Security Operations Center</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            background: linear-gradient(135deg, #020b1c 0%, #0a1929 100%);
-            color: white;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
+        :root {
+            --bg-color: #060913;
+            --card-bg: rgba(16, 24, 48, 0.45);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-cyan: #00f2fe;
+            --accent-cyan-glow: rgba(0, 242, 254, 0.4);
+            --normal-green: #10b981;
+            --normal-green-glow: rgba(16, 185, 129, 0.4);
+            --anomaly-red: #ff3366;
+            --anomaly-red-glow: rgba(255, 51, 102, 0.5);
+            --warning-gold: #f59e0b;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
         }
 
-        h2 {
-            margin-top: 0;
-            font-size: 24px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(13, 27, 65, 0.5) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(20, 11, 48, 0.4) 0px, transparent 50%);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* Container Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 24px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        /* Sidebar Panels */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: sticky;
+            top: 24px;
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-cyan);
+        }
+
+        .panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .panel:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* App Branding */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-cyan), #4facfe);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 12px var(--accent-cyan-glow);
+        }
+
+        .brand-logo svg {
+            width: 18px;
+            height: 18px;
+            fill: #060913;
+        }
+
+        .brand-title {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #ffffff, var(--accent-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .container {
+        .brand-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--normal-green);
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px 8px;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--normal-green);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-green 1.5s infinite;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+        }
+
+        /* Section Headings */
+        .section-header {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-header span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Interactive Feed Selector list */
+        .feed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feed-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .feed-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(4px);
+        }
+
+        .feed-card.active {
+            background: rgba(0, 242, 254, 0.08);
+            border-color: rgba(0, 242, 254, 0.3);
+            box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.05);
+        }
+
+        .feed-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .feed-id {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent-cyan);
+        }
+
+        .feed-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .feed-status {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+        }
+
+        .feed-status.normal {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--normal-green);
+        }
+
+        .feed-status.anomaly {
+            background: rgba(255, 51, 102, 0.1);
+            color: var(--anomaly-red);
+            animation: pulse-red-bg 1.5s infinite;
+        }
+
+        @keyframes pulse-red-bg {
+            0%, 100% { background: rgba(255, 51, 102, 0.1); }
+            50% { background: rgba(255, 51, 102, 0.25); }
+        }
+
+        /* Controls / Slider */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .control-val {
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--accent-cyan-glow);
+            transition: transform 0.1s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Custom Switch */
+        .switch-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .switch-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .3s;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .switch-slider {
+            background-color: rgba(0, 242, 254, 0.2);
+            border-color: var(--accent-cyan);
+        }
+
+        input:checked + .switch-slider:before {
+            transform: translateX(20px);
+            background-color: var(--accent-cyan);
+            box-shadow: 0 0 6px var(--accent-cyan-glow);
+        }
+
+        /* Main Workspace Section */
+        .main-workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Live Feed Monitor Screen */
+        .monitor-panel {
+            position: relative;
+            background: #000;
+            border-radius: 20px;
+            border: 2px solid var(--accent-cyan);
+            box-shadow: 0 16px 48px rgba(0, 242, 254, 0.15);
+            overflow: hidden;
             display: flex;
             justify-content: center;
-            margin-top: 40px;
-            gap: 30px;
+            align-items: center;
+            aspect-ratio: 16/9;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        .video-box {
-            border: 3px solid #ff6b6b;
-            border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+        .monitor-panel.alerting {
+            border-color: var(--anomaly-red);
+            box-shadow: 0 16px 48px rgba(255, 51, 102, 0.35);
         }
 
-        .panel {
-            background: rgba(11, 23, 54, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 15px;
-            width: 320px;
+        .monitor-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Monitor HUD overlays */
+        .hud-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            z-index: 10;
+        }
+
+        .hud-corner {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--accent-cyan);
+            transition: border-color 0.5s;
+        }
+
+        .monitor-panel.alerting .hud-corner {
+            border-color: var(--anomaly-red);
+        }
+
+        .hud-tl { top: 12px; left: 12px; border-right: none; border-bottom: none; }
+        .hud-tr { top: 12px; right: 12px; border-left: none; border-bottom: none; }
+        .hud-bl { bottom: 12px; left: 12px; border-right: none; border-top: none; }
+        .hud-br { bottom: 12px; right: 12px; border-left: none; border-top: none; }
+
+        .hud-meta {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 8px;
+            border-radius: 4px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #4ecdc4;
-            background: #0a1929;
+        .hud-rec {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
             color: white;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rec-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--anomaly-red);
+            border-radius: 50%;
+            animation: pulse-green 1s infinite;
+        }
+
+        .hud-cam-name {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-family: var(--font-mono);
             font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        select:hover {
-            border-color: #ff6b6b;
-        }
-
-        .status {
-            margin-top: 20px;
-        }
-
-        .status p {
-            margin: 10px 0;
-            font-size: 14px;
-        }
-
-        .badge {
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 15px;
             font-weight: bold;
-            font-size: 16px;
-            animation: pulse 2s infinite;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
+        .hud-timestamp {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
         }
 
-        .normal {
-            background: linear-gradient(135deg, #00b894, #00cec9);
+        /* Real-Time Instrument Grid */
+        .instrument-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
 
-        .high {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
         }
 
-        .ai-section {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(78, 205, 196, 0.1);
-            border-radius: 10px;
-            border: 1px solid rgba(78, 205, 196, 0.3);
-        }
-
-        .ai-section h3 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            color: #4ecdc4;
-        }
-
-        .ai-button {
+        .metric-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            height: 3px;
+            background: var(--border-color);
+        }
+
+        .metric-card.normal:before { background: var(--normal-green); }
+        .metric-card.warning:before { background: var(--warning-gold); }
+        .metric-card.alert:before { background: var(--anomaly-red); }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .metric-value-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .metric-val {
+            font-family: var(--font-mono);
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .metric-unit {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+
+        /* Mini progress bar inside card */
+        .metric-progress-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .metric-progress {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease, background-color 0.3s;
+        }
+
+        /* AI Analysis Console */
+        .ai-console {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .ai-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .ai-title svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--accent-cyan);
+            filter: drop-shadow(0 0 4px var(--accent-cyan-glow));
+        }
+
+        .ai-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            font-family: var(--font-main);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             border: none;
-            border-radius: 8px;
             color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
         }
 
-        .ai-button:hover {
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan), #0072ff);
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.25);
+        }
+
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
         }
 
-        .ai-button:disabled {
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .ai-result {
-            margin-top: 15px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
+        .console-screen {
+            background: rgba(6, 9, 19, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: var(--font-mono);
             font-size: 13px;
             line-height: 1.6;
-            min-height: 80px;
-            color: #e0e0e0;
+            color: #d1d5db;
+            min-height: 180px;
+            max-height: 300px;
+            overflow-y: auto;
+            position: relative;
         }
 
-        .loading {
+        .console-screen::-webkit-scrollbar {
+            width: 6px;
+        }
+        .console-screen::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        /* Formatted markdown content styling */
+        .console-content h2, .console-content h3, .console-content h4 {
+            color: var(--accent-cyan);
+            margin: 12px 0 6px 0;
+            font-family: var(--font-main);
+        }
+        .console-content h2:first-child, .console-content h3:first-child, .console-content h4:first-child {
+            margin-top: 0;
+        }
+        .console-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        .console-content li {
+            margin-bottom: 4px;
+        }
+        .console-content strong {
+            color: white;
+            font-weight: 600;
+        }
+
+        .placeholder-text {
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 180px;
+            gap: 12px;
             text-align: center;
-            color: #4ecdc4;
-            font-style: italic;
+        }
+
+        .placeholder-text svg {
+            width: 40px;
+            height: 40px;
+            fill: rgba(255, 255, 255, 0.15);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 242, 254, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-cyan);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 180px;
+            gap: 16px;
+            color: var(--accent-cyan);
+        }
+
+        /* Anomaly system toast message */
+        .alert-bar {
+            background: rgba(255, 51, 102, 0.15);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            border-radius: 12px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slide-in 0.3s ease-out;
+        }
+
+        @keyframes slide-in {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .alert-message {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--anomaly-red);
+        }
+
+        .alert-message svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--anomaly-red);
+            animation: pulse-green 1s infinite;
+        }
+
+        .alert-time {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive spacing adjustments */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 <body>
-
-    <div class="container">
-        <div>
-            <img id="video" class="video-box" src="/video_feed?video=video1" width="640">
-        </div>
-
-        <div class="panel">
-            <h2>🚨 SpaceSense</h2>
-
-            <select onchange="changeVideo(this.value)">
-                <option value="video1">Pedestrian Video 1</option>
-                <option value="video2">Pedestrian Video 2</option>
-                <option value="video3">Pedestrian Video 3</option>
-            </select>
-
-            <div class="status">
-                <p>Status: <span id="status">NORMAL</span></p>
-                <p>Anomalies: <span id="anomalies">0</span></p>
-                <p>Confidence: <span id="confidence">0</span></p>
-
-                <div id="badge" class="badge normal">NORMAL</div>
-            </div>
-
-            <div class="ai-section">
-                <h3>🤖 AI Analysis (Gemini)</h3>
-                <button class="ai-button" onclick="analyzeWithAI()" id="aiBtn">
-                    Analyze Scene with AI
-                </button>
-                <div class="ai-result" id="aiResult">
-                    Click the button to get AI-powered scene analysis...
+    <div class="dashboard-container">
+        
+        <!-- Left Panel / Sidebar Controls -->
+        <div class="sidebar">
+            
+            <!-- Branding Panel -->
+            <div class="panel">
+                <div class="brand">
+                    <div class="brand-logo">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2L2 22h20L12 2zm0 3.99L19.53 19H4.47L12 5.99zM13 16h-2v2h2v-2zm0-6h-2v4h2v-4z"/>
+                        </svg>
+                    </div>
+                    <h1 class="brand-title">SpaceSense</h1>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <div class="brand-status">
+                        <span class="status-dot"></span> SYSTEM SECURE
+                    </div>
+                    <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);" id="activeCamIndicator">
+                        CAM: 01
+                    </div>
                 </div>
             </div>
+
+            <!-- Feed Selection List -->
+            <div class="panel">
+                <div class="section-header">
+                    <span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                        </svg>
+                        Security Feeds
+                    </span>
+                    <span style="font-family: var(--font-mono); font-size: 10px;" id="activeFeedCount">3 Active</span>
+                </div>
+                
+                <div class="feed-list" id="feedListContainer">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Dashboard Adjustments & Options -->
+            <div class="panel">
+                <div class="section-header">
+                    <span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.70,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                        </svg>
+                        Sensitivity Controls
+                    </span>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-item">
+                        <div class="label-row">
+                            <span>Crowd Alarm Trigger</span>
+                            <span class="control-val" id="threshold-val">2 People</span>
+                        </div>
+                        <input type="range" class="slider" id="threshold-slider" min="1" max="10" value="2" onchange="updateThreshold(this.value)">
+                    </div>
+                    
+                    <div class="switch-row">
+                        <span class="switch-label">Audible Alarm Beep</span>
+                        <label class="switch">
+                            <input type="checkbox" id="audioToggle" onchange="toggleAudio(this.checked)">
+                            <span class="switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Key Settings -->
+            <div class="panel">
+                <div class="section-header">
+                    <span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
+                            <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                        </svg>
+                        API Configuration
+                    </span>
+                </div>
+                <div class="control-group">
+                    <div class="control-item">
+                        <div class="label-row" style="margin-bottom: 6px;">
+                            <span>Gemini API Key</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="password" id="apiKeyInput" placeholder="Paste Gemini API key..." style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; font-family: var(--font-mono); font-size: 12px; outline: none;">
+                            <button onclick="saveApiKey()" style="padding: 8px 12px; border-radius: 6px; border: none; background: var(--accent-cyan); color: #060913; font-weight: bold; cursor: pointer; font-size: 12px; transition: all 0.2s;">Save</button>
+                        </div>
+                        <div style="font-family: var(--font-mono); font-size: 11px; margin-top: 6px;" id="apiKeyStatus">
+                            Checking key...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Panel -->
+            <div class="panel">
+                <div class="section-header">
+                    <span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
+                            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                        </svg>
+                        Upload CCTV Feed
+                    </span>
+                </div>
+                <div class="control-group">
+                    <form id="uploadForm" onsubmit="handleUpload(event)" style="display: flex; flex-direction: column; gap: 8px;">
+                        <input type="text" id="uploadName" placeholder="Camera Location Name..." style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; font-size: 12px; outline: none;">
+                        <div style="position: relative; overflow: hidden; border: 1px dashed rgba(255,255,255,0.2); border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(0,0,0,0.1);" id="uploadDropzone" onclick="document.getElementById('uploadInput').click()">
+                            <span style="font-size: 12px; color: var(--text-secondary);" id="uploadPrompt">Choose Video (.mp4)</span>
+                            <input type="file" id="uploadInput" accept="video/*" onchange="fileSelected(this)" style="display: none;">
+                        </div>
+                        <button type="submit" id="uploadBtn" style="padding: 10px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--accent-cyan), #0072ff); color: #060913; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+                            Upload & Register
+                        </button>
+                    </form>
+                    <div style="font-size: 11px; margin-top: 4px; display: none;" id="uploadProgress">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                            <span id="uploadStatusText" style="color: var(--accent-cyan);">Uploading...</span>
+                            <span id="uploadPercent" style="color: var(--accent-cyan); font-family: var(--font-mono);">0%</span>
+                        </div>
+                        <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                            <div style="width: 0%; height: 100%; background: var(--accent-cyan); transition: width 0.1s;" id="uploadProgressBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
+
+        <!-- Main Workspace Area -->
+        <div class="main-workspace">
+            
+            <!-- Dynamic Alert Bar -->
+            <div class="alert-bar" id="anomalyAlertBar" style="display: none;">
+                <div class="alert-message">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <span>ANOMALY ALERT: EXCESSIVE CROWD DENSITY DETECTED</span>
+                </div>
+                <div class="alert-time" id="alertTimestamp">18:32:45</div>
+            </div>
+
+            <!-- Video Monitor Screen -->
+            <div class="monitor-panel" id="monitorPanel">
+                <div class="hud-overlay">
+                    <div class="hud-corner hud-tl"></div>
+                    <div class="hud-corner hud-tr"></div>
+                    <div class="hud-corner hud-bl"></div>
+                    <div class="hud-corner hud-br"></div>
+                </div>
+                <div class="hud-meta" id="hudMetaCam">CAM-01 // SECURITY FEED</div>
+                <div class="hud-rec">
+                    <span class="rec-dot"></span> LIVE
+                </div>
+                <div class="hud-cam-name" id="hudCamName">Pedestrian Crossroad</div>
+                <div class="hud-timestamp" id="hudTimestamp">2026-06-20 18:32:23</div>
+                
+                <img id="videoStream" class="monitor-img" src="/video_feed?video=video1" alt="Security Feed Stream">
+            </div>
+
+            <!-- Metric Instrument Display -->
+            <div class="instrument-grid">
+                
+                <!-- Person Count Metric -->
+                <div class="metric-card normal" id="personMetricCard">
+                    <div class="metric-label">Detected People</div>
+                    <div class="metric-value-row">
+                        <div class="metric-val" id="peopleVal">0</div>
+                        <div class="metric-unit">people</div>
+                    </div>
+                    <div class="metric-progress-bg">
+                        <div class="metric-progress" id="peopleProgress" style="width: 0%; background-color: var(--normal-green);"></div>
+                    </div>
+                </div>
+
+                <!-- Anomaly Score Metric -->
+                <div class="metric-card normal" id="anomalyMetricCard">
+                    <div class="metric-label">Anomaly Score</div>
+                    <div class="metric-value-row">
+                        <div class="metric-val" id="anomalyVal">0</div>
+                        <div class="metric-unit">frames</div>
+                    </div>
+                    <div class="metric-progress-bg">
+                        <div class="metric-progress" id="anomalyProgress" style="width: 0%; background-color: var(--normal-green);"></div>
+                    </div>
+                </div>
+
+                <!-- Confidence Metric -->
+                <div class="metric-card normal" id="confidenceMetricCard">
+                    <div class="metric-label">Confidence Index</div>
+                    <div class="metric-value-row">
+                        <div class="metric-val" id="confidenceVal">0%</div>
+                        <div class="metric-unit">rating</div>
+                    </div>
+                    <div class="metric-progress-bg">
+                        <div class="metric-progress" id="confidenceProgress" style="width: 0%; background-color: var(--normal-green);"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Gemini Incident Report Console -->
+            <div class="ai-console">
+                <div class="ai-header">
+                    <div class="ai-title">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 9h-4v4h-2v-4H7v-2h4V6h2v4h4v2z"/>
+                        </svg>
+                        Google Gemini AI Security Diagnostics
+                    </div>
+                    <div class="ai-controls">
+                        <button class="btn btn-secondary" onclick="copyReport()" id="copyBtn" disabled>
+                            Copy Report
+                        </button>
+                        <button class="btn btn-primary" onclick="generateAIAnalysis()" id="aiBtn">
+                            Run AI Diagnostics
+                        </button>
+                    </div>
+                </div>
+
+                <div class="console-screen" id="consoleScreen">
+                    <div class="placeholder-text" id="consolePlaceholder">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                        <span>Trigger AI diagnostics on the current frame to query Gemini security assessment.</span>
+                    </div>
+                    <div class="console-content" id="consoleContent" style="display: none;"></div>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
     <script>
-        function changeVideo(val) {
-            document.getElementById("video").src =
-                "/video_feed?video=" + val + "&t=" + new Date().getTime();
-        }
+        let currentVideoKey = 'video1';
+        let currentCamId = 'CAM-01';
+        let currentCamName = 'Pedestrian Crossroad';
+        let activeThreshold = 2;
+        let alarmSoundEnabled = false;
 
+        // Web Audio Synthesizer for alerts
+        let audioCtx = null;
+        let lastAlertBeepTime = 0;
+
+        // Sync Clock
         setInterval(() => {
-            fetch("/detect")
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById("status").innerText = data.status;
-                    document.getElementById("anomalies").innerText = data.anomalies;
-                    document.getElementById("confidence").innerText = data.confidence;
-
-                    let badge = document.getElementById("badge");
-                    if (data.status === "ANOMALY DETECTED") {
-                        badge.className = "badge high";
-                        badge.innerText = "HIGH";
-                    } else {
-                        badge.className = "badge normal";
-                        badge.innerText = "NORMAL";
-                    }
-
-                    // Update AI analysis if available
-                    if (data.ai_analysis && data.ai_analysis !== "") {
-                        document.getElementById("aiResult").innerText = data.ai_analysis;
-                    }
-                });
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            document.getElementById("hudTimestamp").innerText = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         }, 1000);
 
-        function analyzeWithAI() {
+        let activeFeeds = [];
+
+        // Fetch Starting Configurations
+        checkApiKeyStatus();
+        fetchFeeds(true);
+        
+        fetch("/get_threshold")
+            .then(res => res.json())
+            .then(data => {
+                if (data.threshold) {
+                    activeThreshold = data.threshold;
+                    document.getElementById("threshold-slider").value = activeThreshold;
+                    document.getElementById("threshold-val").innerText = activeThreshold + (activeThreshold === 1 ? " Person" : " People");
+                }
+            })
+            .catch(err => console.error("Error fetching starting threshold:", err));
+
+        function fetchFeeds(selectFirst = false) {
+            fetch("/get_feeds")
+                .then(res => res.json())
+                .then(feeds => {
+                    activeFeeds = feeds;
+                    renderFeeds(selectFirst);
+                })
+                .catch(err => console.error("Error fetching feeds:", err));
+        }
+
+        function renderFeeds(selectFirst = false) {
+            const container = document.getElementById("feedListContainer");
+            if (!container) return;
+            container.innerHTML = "";
+            
+            document.getElementById("activeFeedCount").innerText = `${activeFeeds.length} Active`;
+            
+            activeFeeds.forEach(feed => {
+                const card = document.createElement("div");
+                card.className = "feed-card";
+                if (feed.key === currentVideoKey) {
+                    card.classList.add("active");
+                }
+                card.id = `feed-${feed.key}`;
+                card.onclick = () => changeVideo(feed.key, feed.id, feed.name);
+                
+                card.innerHTML = `
+                    <div class="feed-info">
+                        <span class="feed-id">${feed.id}</span>
+                        <span class="feed-name">${feed.name}</span>
+                    </div>
+                    <span class="feed-status normal" id="badge-${feed.key}">NORMAL</span>
+                `;
+                container.appendChild(card);
+            });
+
+            if (selectFirst && activeFeeds.length > 0) {
+                const first = activeFeeds[0];
+                changeVideo(first.key, first.id, first.name);
+            }
+        }
+
+        function checkApiKeyStatus() {
+            fetch("/get_api_key_status")
+                .then(res => res.json())
+                .then(data => {
+                    const statusText = document.getElementById("apiKeyStatus");
+                    if (data.is_configured) {
+                        statusText.innerText = "Status: Configured (" + data.key_preview + ")";
+                        statusText.style.color = "var(--normal-green)";
+                    } else {
+                        statusText.innerText = "Status: Not Configured";
+                        statusText.style.color = "var(--anomaly-red)";
+                    }
+                })
+                .catch(err => console.error("Error checking key status:", err));
+        }
+
+        function saveApiKey() {
+            const keyInput = document.getElementById("apiKeyInput");
+            const key = keyInput.value.trim();
+            if (!key) {
+                alert("Please enter a valid API key.");
+                return;
+            }
+            
+            fetch("/update_api_key", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ api_key: key })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("API key updated successfully!");
+                    keyInput.value = "";
+                    checkApiKeyStatus();
+                } else {
+                    alert("Failed to update API key: " + data.message);
+                }
+            })
+            .catch(err => {
+                alert("Error updating API key: " + err.message);
+            });
+        }
+
+        // Change Camera Stream
+        function changeVideo(videoKey, camId, camName) {
+            currentVideoKey = videoKey;
+            currentCamId = camId;
+            currentCamName = camName;
+
+            // Highlight Active Card
+            document.querySelectorAll(".feed-card").forEach(card => card.classList.remove("active"));
+            document.getElementById(`feed-${videoKey}`).classList.add("active");
+
+            // Update Viewport Details
+            document.getElementById("activeCamIndicator").innerText = `CAM: ${camId.split('-')[1]}`;
+            document.getElementById("hudMetaCam").innerText = `${camId} // SECURITY FEED`;
+            document.getElementById("hudCamName").innerText = camName;
+
+            // Trigger Stream Reload
+            document.getElementById("videoStream").src = `/video_feed?video=${videoKey}&t=${Date.now()}`;
+
+            // Reset AI console placeholder for new stream
+            document.getElementById("consoleContent").style.display = "none";
+            document.getElementById("consolePlaceholder").style.display = "flex";
+            document.getElementById("copyBtn").disabled = true;
+        }
+
+        // Send sensitivity threshold updates to the server
+        function updateThreshold(val) {
+            activeThreshold = parseInt(val);
+            document.getElementById("threshold-val").innerText = activeThreshold + (activeThreshold === 1 ? " Person" : " People");
+
+            fetch("/update_threshold", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ threshold: activeThreshold })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error("Failed to update threshold:", data.message);
+                }
+            })
+            .catch(err => console.error("Error updating threshold:", err));
+        }
+
+        // Toggle Audio alert configuration
+        function toggleAudio(checked) {
+            alarmSoundEnabled = checked;
+            if (checked && !audioCtx) {
+                // Initialize audio context on user gesture
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Synthesize electronic sound for alarm alert
+        function triggerAudibleBeep() {
+            if (!alarmSoundEnabled || !audioCtx) return;
+            const now = Date.now();
+            if (now - lastAlertBeepTime < 3000) return; // Wait 3 seconds between alert sounds
+            lastAlertBeepTime = now;
+
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(950, audioCtx.currentTime); // High alert tone
+                osc.frequency.exponentialRampToValueAtTime(450, audioCtx.currentTime + 0.25);
+                
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } catch (e) {
+                console.error("Synthesizer fail:", e);
+            }
+        }
+
+        // Parse basic markdown from Gemini response
+        function formatMarkdown(text) {
+            if (!text) return "";
+            let formatted = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replace(/^### (.*?)$/gm, "<h4>$1</h4>")
+                .replace(/^## (.*?)$/gm, "<h3>$1</h3>")
+                .replace(/^# (.*?)$/gm, "<h2>$1</h2>")
+                .replace(/^\* (.*?)$/gm, "<li>$1</li>")
+                .replace(/^- (.*?)$/gm, "<li>$1</li>")
+                .replace(/\n/g, "<br>");
+            return formatted;
+        }
+
+        // Run AI diagnostics report
+        function generateAIAnalysis() {
             const btn = document.getElementById("aiBtn");
-            const result = document.getElementById("aiResult");
+            const placeholder = document.getElementById("consolePlaceholder");
+            const content = document.getElementById("consoleContent");
+            const copyBtn = document.getElementById("copyBtn");
 
             btn.disabled = true;
-            result.innerHTML = '<div class="loading">🔄 Analyzing with Google Gemini AI...</div>';
+            placeholder.style.display = "none";
+            content.style.display = "block";
+            content.innerHTML = `
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <span>Initializing Security Analysis Protocol via Google Gemini AI...</span>
+                </div>
+            `;
 
-            fetch("/analyze_ai")
+            fetch(`/analyze_ai?video=${currentVideoKey}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        result.innerText = data.analysis;
+                        content.innerHTML = formatMarkdown(data.analysis);
+                        copyBtn.disabled = false;
                     } else {
-                        result.innerText = "⚠️ " + data.message;
+                        content.innerHTML = `<span style="color: var(--anomaly-red);">⚠️ ${data.message}</span>`;
+                        copyBtn.disabled = true;
                     }
                     btn.disabled = false;
                 })
                 .catch(err => {
-                    result.innerText = "❌ Error: " + err.message;
+                    content.innerHTML = `<span style="color: var(--anomaly-red);">❌ Error running analysis: ${err.message}</span>`;
+                    copyBtn.disabled = true;
                     btn.disabled = false;
                 });
         }
-    </script>
 
+        // Copy markdown output to clipboard
+        function copyReport() {
+            const content = document.getElementById("consoleContent").innerText;
+            navigator.clipboard.writeText(content).then(() => {
+                const btn = document.getElementById("copyBtn");
+                const originalText = btn.innerText;
+                btn.innerText = "Copied!";
+                btn.style.color = "var(--normal-green)";
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.color = "";
+                }, 2000);
+            });
+        }
+
+        // Real-Time Stats Polling Loop
+        setInterval(() => {
+            // Poll detection parameters for the selected active camera feed
+            fetch(`/detect?video=${currentVideoKey}`)
+                .then(res => res.json())
+                .then(data => {
+                    const monitor = document.getElementById("monitorPanel");
+                    const alertBar = document.getElementById("anomalyAlertBar");
+                    const statusBadge = document.getElementById(`badge-${currentVideoKey}`);
+                    
+                    const isAnomaly = (data.status === "ANOMALY DETECTED");
+
+                    // 1. Update Monitor border glow & banner alert
+                    if (isAnomaly) {
+                        monitor.classList.add("alerting");
+                        alertBar.style.display = "flex";
+                        const date = new Date();
+                        document.getElementById("alertTimestamp").innerText = 
+                            String(date.getHours()).padStart(2, '0') + ":" + 
+                            String(date.getMinutes()).padStart(2, '0') + ":" + 
+                            String(date.getSeconds()).padStart(2, '0');
+                        
+                        statusBadge.innerText = "ALERT";
+                        statusBadge.className = "feed-status anomaly";
+
+                        // Trigger buzzer sound (if enabled)
+                        triggerAudibleBeep();
+                    } else {
+                        monitor.classList.remove("alerting");
+                        alertBar.style.display = "none";
+                        statusBadge.innerText = "NORMAL";
+                        statusBadge.className = "feed-status normal";
+                    }
+
+                    // 2. Fetch the anomaly score or count from backend
+                    const anomalies = data.anomalies || 0;
+                    const confidence = Math.round(data.confidence * 100);
+                    const people = data.person_count || 0;
+
+                    // Update UI Instrument readings
+                    document.getElementById("peopleVal").innerText = people;
+                    document.getElementById("anomalyVal").innerText = anomalies;
+                    document.getElementById("confidenceVal").innerText = `${confidence}%`;
+
+                    // Update Instrumentation bars
+                    const peopleProgress = document.getElementById("peopleProgress");
+                    const peoplePercentage = Math.min(100, (people / 10) * 100);
+                    peopleProgress.style.width = `${peoplePercentage}%`;
+
+                    const anomalyProgress = document.getElementById("anomalyProgress");
+                    const anomalyPercentage = Math.min(100, (anomalies / 200) * 100);
+                    anomalyProgress.style.width = `${anomalyPercentage}%`;
+
+                    const confidenceProgress = document.getElementById("confidenceProgress");
+                    confidenceProgress.style.width = `${confidence}%`;
+
+                    // Update Card visual indicators (border top color) based on severity
+                    const peopleCard = document.getElementById("personMetricCard");
+                    const anomalyCard = document.getElementById("anomalyMetricCard");
+                    const confidenceCard = document.getElementById("confidenceMetricCard");
+
+                    if (isAnomaly) {
+                        peopleCard.className = "metric-card alert";
+                        peopleProgress.style.backgroundColor = "var(--anomaly-red)";
+                        anomalyCard.className = "metric-card alert";
+                        anomalyProgress.style.backgroundColor = "var(--anomaly-red)";
+                    } else if (people >= activeThreshold - 1 && people > 0) {
+                        peopleCard.className = "metric-card warning";
+                        peopleProgress.style.backgroundColor = "var(--warning-gold)";
+                        anomalyCard.className = "metric-card normal";
+                        anomalyProgress.style.backgroundColor = "var(--normal-green)";
+                    } else {
+                        peopleCard.className = "metric-card normal";
+                        peopleProgress.style.backgroundColor = "var(--normal-green)";
+                        anomalyCard.className = "metric-card normal";
+                        anomalyProgress.style.backgroundColor = "var(--normal-green)";
+                    }
+
+                    if (confidence > 75) {
+                        confidenceCard.className = "metric-card normal";
+                        confidenceProgress.style.backgroundColor = "var(--normal-green)";
+                    } else if (confidence > 30) {
+                        confidenceCard.className = "metric-card warning";
+                        confidenceProgress.style.backgroundColor = "var(--warning-gold)";
+                    } else {
+                        confidenceCard.className = "metric-card alert";
+                        confidenceProgress.style.backgroundColor = "var(--anomaly-red)";
+                    }
+
+                    // Update status for the inactive feeds (simulate network feed logs)
+                    activeFeeds.forEach(feed => {
+                        const key = feed.key;
+                        if (key !== currentVideoKey) {
+                            fetch(`/detect?video=${key}`)
+                                .then(res => res.json())
+                                .then(otherData => {
+                                    const otherBadge = document.getElementById(`badge-${key}`);
+                                    if (otherBadge) {
+                                        if (otherData.status === "ANOMALY DETECTED") {
+                                            otherBadge.innerText = "ALERT";
+                                            otherBadge.className = "feed-status anomaly";
+                                        } else {
+                                            otherBadge.innerText = "NORMAL";
+                                            otherBadge.className = "feed-status normal";
+                                        }
+                                    }
+                                }).catch(() => {});
+                        }
+                    });
+                })
+                .catch(err => console.error("Error polling metrics:", err));
+        }, 1000);
+
+        function fileSelected(input) {
+            const prompt = document.getElementById("uploadPrompt");
+            if (input.files && input.files.length > 0) {
+                prompt.innerText = input.files[0].name;
+                prompt.style.color = "var(--accent-cyan)";
+            } else {
+                prompt.innerText = "Choose Video (.mp4)";
+                prompt.style.color = "var(--text-secondary)";
+            }
+        }
+
+        function handleUpload(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById("uploadInput");
+            const nameInput = document.getElementById("uploadName");
+            const progressContainer = document.getElementById("uploadProgress");
+            const progressBar = document.getElementById("uploadProgressBar");
+            const percentText = document.getElementById("uploadPercent");
+            const statusText = document.getElementById("uploadStatusText");
+            const btn = document.getElementById("uploadBtn");
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select a video file to upload.");
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const name = nameInput.value.trim();
+            
+            const formData = new FormData();
+            formData.append("video", file);
+            if (name) {
+                formData.append("name", name);
+            }
+            
+            btn.disabled = true;
+            progressContainer.style.display = "block";
+            progressBar.style.width = "0%";
+            percentText.innerText = "0%";
+            statusText.innerText = "Uploading...";
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload_video", true);
+            
+            xhr.upload.onprogress = function(event) {
+                if (event.lengthComputable) {
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    progressBar.style.width = `${percent}%`;
+                    percentText.innerText = `${percent}%`;
+                    if (percent === 100) {
+                        statusText.innerText = "Processing video...";
+                    }
+                }
+            };
+            
+            xhr.onload = function() {
+                btn.disabled = false;
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    statusText.innerText = "Upload Complete!";
+                    progressBar.style.width = "100%";
+                    percentText.innerText = "100%";
+                    
+                    fileInput.value = "";
+                    nameInput.value = "";
+                    document.getElementById("uploadPrompt").innerText = "Choose Video (.mp4)";
+                    document.getElementById("uploadPrompt").style.color = "";
+                    
+                    alert(response.message);
+                    
+                    setTimeout(() => {
+                        progressContainer.style.display = "none";
+                    }, 2000);
+                    
+                    fetchFeeds();
+                    
+                    setTimeout(() => {
+                        changeVideo(response.feed.key, response.feed.id, response.feed.name);
+                    }, 200);
+                } else {
+                    let errMsg = "Upload failed.";
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        errMsg = response.message;
+                    } catch (err) {}
+                    statusText.innerText = "Error!";
+                    percentText.innerText = "";
+                    progressBar.style.backgroundColor = "var(--anomaly-red)";
+                    alert("Error: " + errMsg);
+                }
+            };
+            
+            xhr.onerror = function() {
+                btn.disabled = false;
+                statusText.innerText = "Network Error!";
+                alert("Network error during file upload.");
+            };
+            
+            xhr.send(formData);
+        }
+
+    </script>
 </body>
 
 </html>
